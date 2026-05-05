@@ -6,6 +6,7 @@ import { UsersPage } from '@/modules/admin/UsersPage'
 import { PeriodsPage } from '@/modules/admin/PeriodsPage'
 import { GroupsPage } from '@/modules/admin/GroupsPage'
 import { EnrollmentPage } from '@/modules/academic/EnrollmentPage'
+import { StudentGroupAssignment } from '@/modules/academic/StudentGroupAssignment'
 import { LessonManager } from '@/modules/academic/LessonManager'
 import { Gradebook } from '@/modules/academic/Gradebook'
 import { GroupStats } from '@/modules/academic/GroupStats'
@@ -14,6 +15,7 @@ import { TakeExam } from '@/modules/student/TakeExam'
 import { MyProgress } from '@/modules/student/MyProgress'
 import { OrganizationsPage } from '@/modules/superadmin/OrganizationsPage'
 import { AssignmentsPage } from '@/modules/assignments/AssignmentsPage'
+import { ProgramsPage } from '@/modules/admin/ProgramsPage'
 import { ForumPage } from '@/modules/forum/ForumPage'
 import { ChatPage } from '@/modules/chat/ChatPage'
 import { Toaster } from 'react-hot-toast'
@@ -51,9 +53,19 @@ export default function App() {
             <GroupsPage />
           </ProtectedRoute>
         } />
+        <Route path="/programs" element={
+          <ProtectedRoute allowedRoles={['admin', 'super_admin']}>
+            <ProgramsPage />
+          </ProtectedRoute>
+        } />
         <Route path="/enrollments" element={
           <ProtectedRoute allowedRoles={['admin', 'super_admin']}>
             <EnrollmentPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/student-groups" element={
+          <ProtectedRoute allowedRoles={['teacher', 'admin', 'super_admin']}>
+            <StudentGroupAssignment />
           </ProtectedRoute>
         } />
         <Route path="/lessons" element={

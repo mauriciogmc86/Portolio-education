@@ -49,7 +49,7 @@ export function EnrollmentPage() {
       .from('groups')
       .select('*')
       .eq('organization_id', orgId)
-      .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
 
     if (!error && data) {
       setGroups(data as Group[])

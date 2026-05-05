@@ -15,6 +15,12 @@ type MenuItem = {
   icon: ReactNode
 }
 
+function dedupeMenuItems(items: MenuItem[]) {
+  const map = new Map<string, MenuItem>()
+  items.forEach((it) => map.set(it.href, it))
+  return Array.from(map.values())
+}
+
 const baseMenuConfig: Record<Profile['role'], MenuItem[]> = {
   super_admin: [
     { label: 'Dashboard', href: '/dashboard', icon: <HomeIcon /> },
@@ -29,7 +35,7 @@ const baseMenuConfig: Record<Profile['role'], MenuItem[]> = {
     { label: 'Mis Profesores/Alumnos', href: '/users', icon: <UsersIcon /> },
     { label: 'Períodos', href: '/periods', icon: <CalendarIcon /> },
     { label: 'Mis Grupos', href: '/groups', icon: <AcademicIcon /> },
-    { label: 'Cursos', href: '/courses', icon: <BookIcon /> },
+    { label: 'Programas', href: '/programs', icon: <BookIcon /> },
     { label: 'Tareas', href: '/assignments', icon: <AssignmentIcon /> },
     { label: 'Foro', href: '/forum', icon: <ForumIcon /> },
     { label: 'Chat', href: '/chat', icon: <ChatIcon unreadCount={0} /> },
@@ -63,10 +69,9 @@ const superAdminOrgMenuItems: MenuItem[] = [
   { label: 'Profesores/Alumnos', href: '/users', icon: <UsersIcon /> },
   { label: 'Períodos', href: '/periods', icon: <CalendarIcon /> },
   { label: 'Grupos', href: '/groups', icon: <AcademicIcon /> },
-  { label: 'Cursos', href: '/courses', icon: <BookIcon /> },
+  { label: 'Programas', href: '/programs', icon: <BookIcon /> },
   { label: 'Tareas', href: '/assignments', icon: <AssignmentIcon /> },
   { label: 'Foro', href: '/forum', icon: <ForumIcon /> },
-  { label: 'Chat', href: '/chat', icon: <ChatIcon unreadCount={0} /> },
   { label: 'Exámenes', href: '/exams', icon: <ClipboardIcon /> },
   { label: 'Libreta', href: '/gradebook', icon: <BookIcon /> },
   { label: 'Estadísticas', href: '/group-stats', icon: <ChartIcon /> },
@@ -295,9 +300,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const role = user?.profile?.role || 'student'
   const menuConfig = isSuperAdmin && selectedOrgId
-    ? { ...baseMenuConfig, super_admin: [...baseMenuConfig.super_admin, ...superAdminOrgMenuItems] }
+    ? { ...baseMenuConfig, super_admin: dedupeMenuItems([...baseMenuConfig.super_admin, ...superAdminOrgMenuItems]) }
     : baseMenuConfig
-  const menuItems = menuConfig[role]
+  const menuItems = menuConfig[role] || []
 
   return (
     <div className="min-h-screen flex bg-slate-50">

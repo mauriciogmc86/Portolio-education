@@ -13,25 +13,64 @@ type AuthState = {
 }
 
 const authPromise = (async (): Promise<AuthState> => {
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-  if (!user) {
+  if (authError || !user) {
     return { user: null, loading: false }
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
+  try {
+    const { data, error, status } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single()
 
-  return {
-    user: {
-      id: user.id,
-      email: user.email!,
-      profile: profile as Profile | null,
-    },
-    loading: false,
+    if (error && status !== 406) {
+      console.error('Error detallado al cargar perfil:', error.message)
+      console.error('Código de error:', error.code)
+      console.error('Status HTTP:', status)
+      return {
+        user: {
+          id: user.id,
+          email: user.email!,
+          profile: null,
+        },
+        loading: false,
+      }
+    }
+
+    // status === 406 significa "Not Found" - el perfil no existe
+    if (status === 406 || error?.code === 'PGRST116') {
+      console.warn('Perfil no encontrado para el usuario:', user.id)
+      return {
+        user: {
+          id: user.id,
+          email: user.email!,
+          profile: null,
+        },
+        loading: false,
+      }
+    }
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email!,
+        profile: data as Profile,
+      },
+      loading: false,
+    }
+  } catch (error: any) {
+    console.error('Error inesperado en useAuth:', error)
+    return {
+      user: {
+        id: user.id,
+        email: user.email!,
+        profile: null,
+      },
+      loading: false,
+    }
   }
 })()
 

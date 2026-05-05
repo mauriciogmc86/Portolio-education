@@ -14,6 +14,10 @@ import {
   updateSubmission,
   gradeSubmission,
   uploadFile,
+  uploadAssignmentFile,
+  createAssignment,
+  updateAssignment,
+  deleteAssignment,
 } from '@/services/assignmentsService'
 
 export function AssignmentsPage() {
@@ -44,9 +48,6 @@ export function AssignmentsPage() {
 
   useEffect(() => {
     loadData()
-    if (isTeacher) {
-      loadGroups()
-    }
   }, [user, assignmentId])
 
   async function loadGroups() {
@@ -128,20 +129,37 @@ export function AssignmentsPage() {
           setSubmission(sub)
         }
       } else {
-        const { data: enrollments } = await supabase
-          .from('enrollments')
-          .select('group_id')
-          .eq('student_id', user.id)
+        // For students: get groups from group_members OR enrollments
+        if (isStudent) {
+          // Buscar en group_members
+          const { data: memberships } = await supabase
+            .from('group_members')
+            .select('group_id')
+            .eq('profile_id', user.id)
 
-        if (enrollments && enrollments.length > 0 && isStudent) {
-          const groupIds = enrollments.map(e => e.group_id)
-          const { data } = await supabase
-            .from('assignments')
-            .select('*')
-            .in('group_id', groupIds)
-            .order('due_date', { ascending: true })
+          // Buscar en enrollments (legacy)
+          const { data: enrollments } = await supabase
+            .from('enrollments')
+            .select('group_id')
+            .eq('student_id', user.id)
 
-          setAssignments(data || [])
+          const groupIds = [
+            ...(memberships?.map(m => m.group_id) || []),
+            ...(enrollments?.map(e => e.group_id) || [])
+          ]
+
+          if (groupIds.length > 0) {
+            const { data } = await supabase
+              .from('assignments')
+              .select('*')
+              .in('group_id', groupIds)
+              .order('due_date', { ascending: true })
+
+            setAssignments(data || [])
+          } else {
+            setAssignments([])
+            toast('No estás inscrito en ningún grupo. Contacta a tu profesor.')
+          }
         } else if (isTeacher) {
           const { data } = await supabase
             .from('assignments')

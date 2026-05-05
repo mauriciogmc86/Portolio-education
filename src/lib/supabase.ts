@@ -124,12 +124,15 @@ export type Assignment = {
   title: string
   description: string | null
   group_id: string
-  organization_id: string
+  program_id?: string | null
   due_date: string | null
   max_grade: number | null
   allow_late_submission: boolean
   created_at: string
   updated_at: string
+  file_url?: string | null
+  file_name?: string | null
+  file_type?: string | null
 }
 
 export type Submission = {
@@ -179,4 +182,17 @@ export type Message = {
   content: string
   is_read: boolean
   created_at: string
+}
+
+export type Program = {
+  id: string
+  organization_id: string
+  name: string
+  code: string | null
+  description: string | null
+  duration_months: number | null
+  cover_url: string | null
+  is_active: boolean
+  created_at: string
+  updated_at: string
 }
